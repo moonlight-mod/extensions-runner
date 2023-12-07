@@ -1,0 +1,9 @@
+{
+  "name": "@moonlight-mod/extensions-runner",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "runner": "node runner/index.mjs",
+    "builder": "node builder/index.mjs"
+  }
+}
