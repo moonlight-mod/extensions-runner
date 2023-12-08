@@ -127,7 +127,20 @@ for (const name of deleted) {
 for (const name in changed) {
   const oldCommit = stateBak[name]?.commit ?? "none";
   const newCommit = changed[name].commit;
-  console.log(`${name}: ${oldCommit} -> ${newCommit}`);
+  let msg = `${name}: ${oldCommit} -> ${newCommit}`;
+
+  // Flawed, but w/e
+  if (changed[name].repository.startsWith("https://github.com/")) {
+    const repoUrl = changed[name].repository.replace(".git", "");
+
+    let diffUrl =
+      oldCommit === "none"
+        ? `${repoUrl}/tree/${newCommit}`
+        : `${repoUrl}/compare/${oldCommit}...${newCommit}`;
+    msg += ` (${diffUrl})`;
+  }
+
+  console.log(msg);
 }
 
 for (const name of deleted) {
