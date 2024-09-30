@@ -49,6 +49,7 @@ for (const file of fs.readdirSync(manifestsPath)) {
   manifests[name] = manifest;
 }
 
+const stateStrFile = path.join(workPath, "state.md");
 const stateFile = path.join(distPath, "state.json");
 const state = fs.existsSync(stateFile)
   ? JSON.parse(fs.readFileSync(stateFile, "utf8"))
@@ -114,6 +115,7 @@ const stateBak = { ...state };
 
 for (const name in changed) {
   console.log(`Running ${name}`);
+  // TODO: post about failed builds here. if the build fails it won't post why
   await run(name, changed[name]);
 }
 
@@ -124,28 +126,63 @@ for (const name of deleted) {
   delete state[name];
 }
 
+let stateStr = "# Extensions state\n\n";
+
 for (const name in changed) {
   const oldCommit = stateBak[name]?.commit ?? "none";
   const newCommit = changed[name].commit;
-  let msg = `${name}: ${oldCommit} -> ${newCommit}`;
+
+  let oldCommitStr = oldCommit;
+  let newCommitStr = newCommit;
+  let diffStr = null;
 
   // Flawed, but w/e
   if (changed[name].repository.startsWith("https://github.com/")) {
     const repoUrl = changed[name].repository.replace(".git", "");
 
-    let diffUrl =
+    if (oldCommit !== "none") {
+      const oldCommitUrl = `${repoUrl}/commit/${oldCommit}`;
+      oldCommitStr = `[${oldCommit}](${oldCommitUrl})`;
+    }
+
+    const newCommitUrl = `${repoUrl}/commit/${newCommit}`;
+    newCommitStr = `[${newCommit}](${newCommitUrl})`;
+
+    const diffUrl =
       oldCommit === "none"
         ? `${repoUrl}/tree/${newCommit}`
         : `${repoUrl}/compare/${oldCommit}...${newCommit}`;
-    msg += ` (${diffUrl})`;
+    diffStr = `[Diff](${diffUrl})`;
   }
 
+  let msg = `## ${name}\n\n- Repository: <${changed[name].repository}>\n- Old commit: ${oldCommitStr}\n- New commit: ${newCommitStr}`;
+  if (diffStr != null) {
+    msg += `\n- ${diffStr}`;
+  }
+
+  msg += "\n\n";
   console.log(msg);
+
+  stateStr += msg;
 }
 
 for (const name of deleted) {
   const oldCommit = stateBak[name]?.commit ?? "none";
-  console.log(`${name}: ${oldCommit} -> none`);
+  let oldCommitStr = oldCommit;
+
+  const repo = changed[name]?.repository ?? "unknown";
+
+  if (repo.startsWith("https://github.com/")) {
+    const repoUrl = changed[name].repository.replace(".git", "");
+    const oldCommitUrl = `${repoUrl}/commit/${oldCommit}`;
+    oldCommitStr = `[${oldCommit}](${oldCommitUrl})`;
+  }
+
+  const msg = `## ${name}\n\n- Repository: <${repo}>\n- Old commit: ${oldCommitStr}\n- Deleted\n\n`;
+  console.log(msg);
+  stateStr += msg;
 }
 
 fs.writeFileSync(stateFile, JSON.stringify(state));
+
+fs.writeFileSync(stateStrFile, stateStr.trim() + "\n");
