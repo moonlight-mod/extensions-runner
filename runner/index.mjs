@@ -173,7 +173,7 @@ for (const name of deleted) {
   const repo = stateBak[name]?.repository ?? "unknown";
 
   if (repo.startsWith("https://github.com/")) {
-    const repoUrl = changed[name].repository.replace(".git", "");
+    const repoUrl = repo.replace(".git", "");
     const oldCommitUrl = `${repoUrl}/commit/${oldCommit}`;
     oldCommitStr = `[${oldCommit}](${oldCommitUrl})`;
   }
