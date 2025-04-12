@@ -1,9 +1,39 @@
 {
   "name": "@moonlight-mod/extensions-runner",
-  "version": "1.0.0",
   "private": true,
+  "packageManager": "pnpm@10.7.1",
+  "engineStrict": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22",
+    "pnpm": ">=10",
+    "npm": "pnpm",
+    "yarn": "pnpm"
+  },
   "scripts": {
-    "runner": "node runner/index.mjs",
-    "builder": "node builder/index.mjs"
+    "build": "tsc --build",
+    "clean": "pnpm build --clean"
+  },
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.js",
+  "homepage": "https://moonlight-mod.github.io/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/moonlight-mod/extensions-runner.git"
+  },
+  "bugs": {
+    "url": "https://github.com/moonlight-mod/extensions-runner/issues"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@electron/asar": "^3.4.1",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
   }
 }
