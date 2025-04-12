@@ -334,8 +334,16 @@ export default async function run() {
     const newVersion = newState?.version;
     if (newVersion != null) {
       summaryMsg += `- Version: ${newVersion}`;
+
       const oldVersion = oldState?.version;
-      if (oldVersion === newVersion) summaryMsg += ` **(same version)**`;
+      if (oldVersion != null) {
+        if (oldVersion === newVersion) {
+          summaryMsg += ` **(same version)**`;
+        } else {
+          summaryMsg += ` (prev ${oldVersion})`;
+        }
+      }
+
       summaryMsg += "\n";
     }
 
