@@ -332,7 +332,10 @@ export default async function run() {
     }
 
     const newVersion = newState?.version;
-    if (newVersion != null) {
+    const oldVersion = oldState?.version;
+    if (change.type === "remove") {
+      if (oldVersion != null) summaryMsg += `- Version: ${oldVersion}`;
+    } else if (newVersion != null) {
       summaryMsg += `- Version: ${newVersion}`;
 
       const oldVersion = oldState?.version;
