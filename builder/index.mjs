@@ -28,9 +28,15 @@ const artifactPath = path.join(workPath, "artifact");
 const manifestPath = path.join(workPath, "manifest.json");
 const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
 
+// Apply some common defaults
+manifest.scripts ??= ["build", "repo"];
+manifest.artifact ??= `repo/${process.env.EXT_ID}.asar`;
+
+// TODO: reuse clone for multiple extensions being updated at once
 await exec("git", ["clone", manifest.repository, gitPath]);
 await exec("git", ["checkout", manifest.commit], { cwd: gitPath });
 
+// TODO: support for other package managers
 await exec("pnpm", ["install", "--recursive"], { cwd: gitPath });
 for (const script of manifest.scripts) {
   await exec("pnpm", ["run", script], { cwd: gitPath });

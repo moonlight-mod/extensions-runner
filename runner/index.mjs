@@ -43,17 +43,13 @@ const manifests = {};
 for (const file of fs.readdirSync(manifestsPath)) {
   if (!file.endsWith(".json")) continue;
   const name = file.replace(/\.json$/, "");
-  const manifest = JSON.parse(
-    fs.readFileSync(path.join(manifestsPath, file), "utf8")
-  );
+  const manifest = JSON.parse(fs.readFileSync(path.join(manifestsPath, file), "utf8"));
   manifests[name] = manifest;
 }
 
 const stateStrFile = path.join(workPath, "state.md");
 const stateFile = path.join(distPath, "state.json");
-const state = fs.existsSync(stateFile)
-  ? JSON.parse(fs.readFileSync(stateFile, "utf8"))
-  : {};
+const state = fs.existsSync(stateFile) ? JSON.parse(fs.readFileSync(stateFile, "utf8")) : {};
 
 const changed = {};
 const deleted = [];
@@ -61,6 +57,12 @@ const deleted = [];
 for (const name in manifests) {
   const manifest = manifests[name];
   const old = state[name];
+
+  // TODO: this is probably not that good of a check
+  if (!manifest.repository.startsWith("https:")) {
+    throw new Error("Only HTTPS Git urls are supported for repositories");
+  }
+
   if (old == null || old.commit !== manifest.commit) {
     changed[name] = manifest;
   }
@@ -88,6 +90,7 @@ async function run(ext, manifest) {
   const extManifestPath = path.join(extWorkPath, "manifest.json");
   fs.writeFileSync(extManifestPath, JSON.stringify(manifest));
 
+  // TODO: run this without network access?
   await exec("docker", [
     "run",
     "--rm",
@@ -115,7 +118,7 @@ const stateBak = { ...state };
 
 for (const name in changed) {
   console.log(`Running ${name}`);
-  // TODO: post about failed builds here. if the build fails it won't post why
+  // TODO: post about failed builds here?
   await run(name, changed[name]);
 }
 
@@ -149,9 +152,7 @@ for (const name in changed) {
     newCommitStr = `[${newCommit}](${newCommitUrl})`;
 
     const diffUrl =
-      oldCommit === "none"
-        ? `${repoUrl}/tree/${newCommit}`
-        : `${repoUrl}/compare/${oldCommit}...${newCommit}`;
+      oldCommit === "none" ? `${repoUrl}/tree/${newCommit}` : `${repoUrl}/compare/${oldCommit}...${newCommit}`;
     diffStr = `[Diff](${diffUrl})`;
   }
 
@@ -183,6 +184,5 @@ for (const name of deleted) {
   stateStr += msg;
 }
 
-fs.writeFileSync(stateFile, JSON.stringify(state));
-
+fs.writeFileSync(stateFile, JSON.stringify(state, null, 2));
 fs.writeFileSync(stateStrFile, stateStr.trim() + "\n");
