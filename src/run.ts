@@ -167,7 +167,7 @@ async function processGroups(groupDir: string, groupHostDir: string, changes: Re
       await ensureDir(outputDir);
 
       // https://stackoverflow.com/a/3489576
-      await exec("git", ["init"], {
+      await exec("git", ["init", "--initial-branch=main"], {
         cwd: sourceDir
       });
       await exec("git", ["remote", "add", "origin", manifest.repository], {
