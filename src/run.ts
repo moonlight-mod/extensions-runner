@@ -13,6 +13,7 @@ import { getCommitLink, getCommitTree, getCommitDiff, maybeWrapLink } from "./ut
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import { exec } from "./util/exec.js";
+import runContainer from "./util/docker.js";
 
 type Manifests = Record<string, BuildManifest>;
 type ExtensionChange =
@@ -111,24 +112,7 @@ async function build(group: BuildGroup) {
   };
   await fs.writeFile(groupStatePath, JSON.stringify(groupState));
 
-  // Run the builder (without network access!)
-  await exec("docker", [
-    "run",
-    "--rm",
-
-    "--net",
-    "none",
-
-    // Remember that we're using the socket from the host!
-    "-v",
-    `${group.hostDirectory}:/moonlight/group`,
-
-    // Tell the container to build this group
-    "-e",
-    "MOONLIGHT_BUILD_MODE=group",
-
-    "moonlight-mod/extensions-runner:latest"
-  ]);
+  await runContainer(group.hostDirectory);
 
   // Pass through a schema in case it gets tampered with
   const groupResultPath = path.join(group.directory, "result.json");
@@ -179,11 +163,15 @@ async function processGroups(groupDir: string, groupHostDir: string, changes: Re
       await exec("git", ["reset", "--hard", "FETCH_HEAD"], {
         cwd: sourceDir
       });
+      await exec("git", ["submodule", "update", "--init", "--recursive"], {
+        cwd: sourceDir
+      });
 
       // Prefetch packages into the store so we can build offline
       await exec("pnpm", ["fetch"], {
         cwd: sourceDir,
         env: {
+          PATH: process.env["PATH"],
           [envVariables.npmStoreDir]: storeDir
         }
       });

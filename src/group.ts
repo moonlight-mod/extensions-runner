@@ -27,12 +27,13 @@ export default async function buildGroup() {
       "install",
       "--frozen-lockfile",
       "--offline",
-      // https://github.com/pnpm/pnpm/issues/6778
-      "--config.confirmModulesPurge=false"
+      "--config.confirmModulesPurge=false", // auto-confirm yes to remaking node_modules
+      "--config.managePackageManagerVersions=false" // skip trying to pin pnpm without the network
     ],
     {
       cwd: sourceDir,
       env: {
+        PATH: process.env["PATH"],
         [envVariables.npmStoreDir]: storeDir
       }
     }
@@ -40,7 +41,11 @@ export default async function buildGroup() {
 
   for (const script of groupState.scripts) {
     await exec("pnpm", ["run", script], {
-      cwd: sourceDir
+      cwd: sourceDir,
+      env: {
+        PATH: process.env["PATH"],
+        [envVariables.npmStoreDir]: storeDir
+      }
     });
   }
 

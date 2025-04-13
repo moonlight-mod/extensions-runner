@@ -8,7 +8,6 @@ export function exec(cmd: string, args: string[], opts?: SpawnOptions): Promise<
     });
 
     proc.on("error", reject);
-
     proc.on("close", (code) => {
       if (code === 0) {
         resolve();
