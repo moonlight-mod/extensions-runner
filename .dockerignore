@@ -1,4 +1,11 @@
-.git
-.gitignore
-/node_modules
-/runner
+**/.dockerignore
+**/.git
+**/.gitignore
+**/.vscode
+**/.idea
+**/Dockerfile*
+**/node_modules
+**/dist
+**/local
+LICENSE
+README.md
