@@ -1,6 +1,7 @@
 
+# Make sure these directly line up with the README
 ARG NODE_VERSION=22
-ARG PNPM_VERSION=10
+ARG PNPM_VERSION="10.7.1"
 
 FROM node:${NODE_VERSION}-alpine AS base
 ENV PNPM_HOME="/pnpm"

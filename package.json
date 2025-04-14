@@ -11,6 +11,7 @@
     "yarn": "pnpm"
   },
   "scripts": {
+    "start": "node dist",
     "build": "tsc --build",
     "clean": "pnpm build --clean"
   },
@@ -29,8 +30,8 @@
   "license": "MIT",
   "dependencies": {
     "@electron/asar": "^3.4.1",
-    "undici": "^7.8.0",
-    "zod": "^3.24.2"
+    "@zod/mini": "4.0.0-beta.20250412T085909",
+    "undici": "^7.8.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.1",

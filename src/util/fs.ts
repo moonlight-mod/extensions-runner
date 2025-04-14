@@ -7,30 +7,35 @@ export const pathExists = (path: string) =>
     .then(() => true)
     .catch(() => false);
 
-export async function ensureDir(path: string) {
+export async function cleanDir(dir: string) {
   const isDirectory = await fs
-    .stat(path)
+    .stat(dir)
+    .then((s) => s.isDirectory())
+    .catch(() => null);
+
+  if (isDirectory !== true) throw new Error(`Tried to clean a directory that doesn't exist: ${dir}`);
+
+  const entries = await fs.readdir(dir);
+  for (const entry of entries) {
+    const fullEntry = path.join(dir, entry);
+    await fs.rm(fullEntry, { recursive: true, force: true });
+  }
+}
+
+export async function ensureDir(dir: string, clean?: boolean) {
+  const isDirectory = await fs
+    .stat(dir)
     .then((s) => s.isDirectory())
     .catch(() => null);
 
   // Exists, but is a file
-  if (isDirectory === false) throw new Error(`Tried to use file as directory: ${path}`);
+  if (isDirectory === false) throw new Error(`Tried to use file as directory: ${dir}`);
+
+  // Clean if needed (removing the files inside instead of the folder since it may be mounted)
+  if (clean && isDirectory === true) {
+    await cleanDir(dir);
+  }
 
   // Create if it doesn't exist
-  if (isDirectory === null) await fs.mkdir(path, { recursive: true });
-}
-
-export async function recursiveCopy(src: string, dst: string) {
-  for (const filename of await fs.readdir(src)) {
-    const srcPath = path.join(src, filename);
-    const dstPath = path.join(dst, filename);
-
-    const isDirectory = (await fs.stat(srcPath)).isDirectory();
-    if (isDirectory) {
-      await ensureDir(dstPath);
-      await recursiveCopy(srcPath, dstPath);
-    } else {
-      await fs.copyFile(srcPath, dstPath);
-    }
-  }
+  if (isDirectory === null) await fs.mkdir(dir, { recursive: true });
 }

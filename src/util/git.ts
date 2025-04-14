@@ -52,12 +52,3 @@ export function getCommitDiff(repository: string, oldCommit: string, newCommit: 
 
   return undefined;
 }
-
-// kinda meh about this being in this file but w/e
-export function maybeWrapLink(text: string, link?: string) {
-  if (link != null) {
-    return `[${text}](${link})`;
-  } else {
-    return text;
-  }
-}
