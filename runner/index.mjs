@@ -124,7 +124,7 @@ for (const name in changed) {
 
 for (const name of deleted) {
   console.log(`Deleting ${name}`);
-  const asarPath = path.join(distPath, name + ".asar");
+  const asarPath = path.join(distPath, "exts", name + ".asar");
   if (fs.existsSync(asarPath)) fs.rmSync(asarPath);
   delete state[name];
 }
